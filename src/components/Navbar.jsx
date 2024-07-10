@@ -20,6 +20,7 @@ const Navbar = () => {
       <Link to='/'>
       <h1 className='text-red-600 text-4xl font-bold cursor-pointer'>CineVerse</h1>
       </Link>
+      <input className='sm:w-15 md:w-25 p-2 rounded opacity-50 hover:opacity-80 bg-gray-800 text-white' placeholder='Search Movies'></input>
       {user?.email ? (
          <div>
          <Link to='/account'>
