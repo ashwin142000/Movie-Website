@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { UserAuth } from '../context/AuthContext';
 
+
 const Navbar = () => {
   const {user,logOut}=UserAuth();
   const navigate = useNavigate();
@@ -20,11 +21,13 @@ const Navbar = () => {
       <Link to='/'>
       <h1 className='text-red-600 text-4xl font-bold cursor-pointer'>CineVerse</h1>
       </Link>
-      <input className='sm:w-15 md:w-25 p-2 rounded opacity-50 hover:opacity-80 bg-gray-800 text-white' placeholder='Search Movies'></input>
+     <Link to='/searchbar'>
+      <button className='sm:w-15 md:w-25 p-2 rounded opacity-50 hover:opacity-80 bg-gray-800 text-white'>Search Movies</button>
+      </Link>
       {user?.email ? (
          <div>
          <Link to='/account'>
-         <button className='text-white pr-4'>Account</button>
+         <button className='text-white pr-4'>My Space</button>
          </Link>
          
          <button onClick={handleLogout} className='text-white bg-red-600 px-6 py-2 rounded cusrsor-pointer'>Log Out</button>

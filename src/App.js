@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Account from './pages/Account';
 import ProtectedRoute from './components/ProtectedRoute';
+import SearchBar from './pages/SearchBar';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path='/signup' element={<Signup/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/account' element={<ProtectedRoute><Account/></ProtectedRoute> } />
+        <Route path='/searchbar' element={<SearchBar/>} />
       </Routes>
     </AuthContextProvider>
   );
