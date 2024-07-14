@@ -1,115 +1,11 @@
-// import React,{useState,useEffect} from 'react';
-// import axios from 'axios';
-// import Row from '../components/Row';
-// import requests from '../Requests';
-// import Movie from '../components/Movie';
-// import { query } from 'firebase/firestore';
-// import YouTube from 'react-youtube';
-// import MovieSearch from '../components/MovieSearch';
-
-// const SearchBar = () => {
-//   const MOVIE_API= "https://api.themoviedb.org/3/";
-//   const SEARCH_API = MOVIE_API + "search/movie"
-//   const DISCOVER_API = MOVIE_API + "discover/movie"
-//   const API_KEY = "43ee128f34b5f49403606c190e501ab0"
-//   const [searchKey,setSearchKey]=useState("");
-//   const [movies, setMovies] = useState([]);
-//   const [movie, setMovie] = useState({title: "Loading Movies"})
-//   const [playing, setPlaying] = useState(false)
-//   const [trailer, setTrailer] = useState(null)
-
-//   const fetchMovies = async (event)=>{
-//     if (event){
-//       event.preventDefault()
-//     }
-   
-//     const {data} = await axios.get(`${searchKey ? SEARCH_API : DISCOVER_API}`,{
-//       params:{
-//         api_key:API_KEY,
-//         query: searchKey
-//       }
-//     })
-//     setMovies(data.results)
-//     setMovie(data.results[0])
-//     if (data.results.length) {
-//       await fetchMovie(data.results[0].id)
-//     }
-//   }
-
-//   const fetchMovie = async (id) => {
-//     const {data} = await axios.get(`${MOVIE_API}movie/${id}`, {
-//         params: {
-//             api_key: API_KEY,
-//             append_to_response: "videos"
-//         }
-//     })
-
-//     if (data.videos && data.videos.results) {
-//         const trailer = data.videos.results.find(vid => vid.name === "Official Trailer")
-//         setTrailer(trailer ? trailer : data.videos.results[0])
-//     }
-
-//     setMovie(data)
-// }
-
-
-//   useEffect(() => {
-//     fetchMovies()
-//   }, []);
-
-//   const selectMovie = (movie) => {
-//     fetchMovie(movie.id)
-//     setPlaying(false)
-//     setMovie(movie)
-//     window.scrollTo(0, 0)
-// }
-
-// const renderMovies = () => (
-//     movies.map(movie => (
-//         <MovieSearch
-//             selectMovie={selectMovie}
-//             key={movie.id}
-//             movie={movie}
-//         />
-//     ))
-// )
-
-
-//   return (
-//     <div className='w-full h-screen'>
-//         <div className='absolute top-[10%] flex items-center p-4 md:p-8'>
-//           <form className='form' onSubmit={fetchMovies}>
-//           <input className='p-2 rounded opacity-50 hover:opacity-80 bg-gray-800 w-[300px] text-white' placeholder='Search Movies and TV Shows'
-//                  onChange={(event) => setSearchKey(event.target.value)}>
-
-//           </input>
-//           <button className='text-white bg-gray-600 p-2 rounded' type={"submit"}>Search</button>
-//           </form>
-//         </div>
-        
-//         <div className='w-full top-36 relative flex items-center text-white'>
-//           <YouTube/>
-//         </div>
-//         <div
-//           className='w-full top-3/4 h-full relative items-center p-20'
-//         >
-//           {renderMovies()}
-//         </div>
-//       </div>
-
-
-//   )
-// }
-
-// export default SearchBar
-
-
-
 import {useEffect, useState} from "react"
 import '../App.css'
 import axios from 'axios'
 import MovieSearch from "../components/MovieSearch"
 import Youtube from 'react-youtube'
+import { UserAuth } from '../context/AuthContext';
+import { db } from '../firebase';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 function SearchBar() {
     const MOVIE_API = "https://api.themoviedb.org/3/"
@@ -123,6 +19,27 @@ function SearchBar() {
     const [movies, setMovies] = useState([])
     const [searchKey, setSearchKey] = useState("")
     const [movie, setMovie] = useState({title: "Loading Movies"})
+
+    const [watchLater,setWatchLater] = useState(false);
+    const { user } = UserAuth();
+
+    const movieID = doc(db, 'users', `${user?.email}`);
+
+    const saveWatchLater = async () => {
+      if (user?.email) {
+        setWatchLater(true);
+        await updateDoc(movieID, {
+          watchLaterShows: arrayUnion({
+            id: movie.id,
+            title: movie.title,
+            img: movie.backdrop_path,
+          }),
+        });
+        alert("Successfully added to Watchlist")
+      } else {
+        alert('Log in to add movie to WatchList');
+      }
+    };
 
     useEffect(() => {
         fetchMovies()
@@ -235,7 +152,7 @@ function SearchBar() {
                                                     type="button">Play
                                                 </button>
                                             : 'Sorry, no trailer available'}
-                                        <button className='border font-bold text-white border-gray-300 py-2 px-5 ml-3'>Watch Later</button>
+                                        <button onClick={saveWatchLater} className='border font-bold text-white border-gray-300 py-2 px-5 ml-3'>Watch Later</button>
                                         </div>
                                         <p className='text-gray-400 text-sm'>Released: {movie?.release_date}</p>
                                         <p className="w-full md:max-w-[70%] lg:max-w-[50%] xl:max-w-[35%] text-gray-200">{movie.overview}</p>
